@@ -16,9 +16,6 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * Handler global de exceções para padronização de respostas de erro da API.
- */
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {

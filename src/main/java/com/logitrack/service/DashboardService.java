@@ -12,9 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 
-/**
- * Serviço responsável por agregar e retornar as métricas do Dashboard.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor

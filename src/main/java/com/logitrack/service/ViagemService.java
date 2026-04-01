@@ -15,9 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Serviço responsável pelas regras de negócio de Viagens.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor

@@ -8,10 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Controller REST para o Dashboard de métricas.
- * Rota base: /api/v1/dashboard
- */
 @RestController
 @RequestMapping("/api/v1/dashboard")
 @RequiredArgsConstructor
