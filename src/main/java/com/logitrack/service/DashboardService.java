@@ -5,6 +5,7 @@ import com.logitrack.repository.ManutencaoRepository;
 import com.logitrack.repository.ViagemRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,51 +49,30 @@ public class DashboardService {
         return viagemRepository.findRankingVeiculosPorKm()
                 .stream()
                 .map(p -> RankingVeiculoDTO.builder()
-                        .veiculoId(p.getVeiculoId())
                         .placa(p.getPlaca())
                         .modelo(p.getModelo())
                         .tipo(p.getTipo())
                         .totalKm(p.getTotalKm())
-                        .totalViagens(p.getTotalViagens())
                         .build())
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<ProximaManutencaoDTO> getProximasManutencoes() {
-        log.debug("Buscando próximas 5 manutenções pendentes");
-
-        return manutencaoRepository.findProximasManutencoes()
-                .stream()
-                .map(p -> ProximaManutencaoDTO.builder()
-                        .manutencaoId(p.getManutencaoId())
-                        .veiculoId(p.getVeiculoId())
-                        .placa(p.getPlaca())
-                        .modelo(p.getModelo())
-                        .dataInicio(p.getDataInicio())
-                        .tipoServico(p.getTipoServico())
-                        .custoEstimado(p.getCustoEstimado())
-                        .status(p.getStatus())
-                        .build())
-                .toList();
+        log.debug("Buscando 5 primeiras manutenções não concluídas");
+        // O repositório agora retorna diretamente os DTOs via JPQL Constructor Expression
+        return manutencaoRepository.findProximasManutencoes(PageRequest.of(0, 5));
     }
 
     @Transactional(readOnly = true)
     public ProjecaoCustoDTO getProjecaoCustoMesAtual() {
-        log.debug("Calculando projeção de custo de manutenção");
+        log.debug("Calculando projeção total de custo de manutenção");
 
-        return manutencaoRepository.findProjecaoCustoMesAtual()
-                .map(p -> ProjecaoCustoDTO.builder()
-                        .mes(p.getMes())
-                        .ano(p.getAno())
-                        .custoEstimadoTotal(p.getCustoEstimadoTotal())
-                        .totalManutencoes(p.getTotalManutencoes())
-                        .build())
-                .orElseGet(() -> ProjecaoCustoDTO.builder()
-                        .mes(0)
-                        .ano(0)
-                        .custoEstimadoTotal(BigDecimal.ZERO)
-                        .totalManutencoes(0L)
-                        .build());
+        BigDecimal total = manutencaoRepository.sumTotalCustoEstimado()
+                .orElse(BigDecimal.ZERO);
+
+        return ProjecaoCustoDTO.builder()
+                .total(total)
+                .build();
     }
 }

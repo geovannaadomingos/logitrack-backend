@@ -5,7 +5,7 @@ import lombok.*;
 import java.math.BigDecimal;
 
 /**
- * DTO que representa a projeção de custo de manutenção do mês atual.
+ * DTO que representa a soma total estimada de custos de manutenção.
  */
 @Getter
 @NoArgsConstructor
@@ -13,8 +13,5 @@ import java.math.BigDecimal;
 @Builder
 public class ProjecaoCustoDTO {
 
-    private Integer mes;
-    private Integer ano;
-    private BigDecimal custoEstimadoTotal;
-    private Long totalManutencoes;
+    private BigDecimal total;
 }

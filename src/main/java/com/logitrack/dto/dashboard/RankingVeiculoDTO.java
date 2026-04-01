@@ -13,10 +13,8 @@ import java.math.BigDecimal;
 @Builder
 public class RankingVeiculoDTO {
 
-    private Long veiculoId;
     private String placa;
     private String modelo;
     private String tipo;
     private BigDecimal totalKm;
-    private Long totalViagens;
 }
