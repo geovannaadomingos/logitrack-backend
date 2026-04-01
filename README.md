@@ -1,7 +1,7 @@
 # LogiTrack Pro — Backend API
 
 Sistemas logísticos perdem eficiência quando não há visibilidade sobre a frota.
-**LogiTrack Pro** resolve isso com uma API REST que centraliza o registro de viagens e expoe métricas operacionais em tempo real — quilometragem, custo de manutenção, desempenho por veículo — prontas para alimentar dashboards e apoiar decisões de gestão.
+**LogiTrack Pro** resolve isso com uma API REST que centraliza o registro de viagens e expõe métricas operacionais em tempo real — quilometragem, custo de manutenção, desempenho por veículo — prontas para alimentar dashboards e apoiar decisões de gestão.
 
 ---
 
@@ -9,7 +9,7 @@ Sistemas logísticos perdem eficiência quando não há visibilidade sobre a fro
 
 Este projeto simula o backend de um sistema de gestão de frota para empresas de logística.
 O foco está em dois eixos: **operações CRUD** de viagens e **análise de dados** via dashboard.
-O dashboard agrega informações como total de KM percorrido, ranking de veículos e projeção de custo de manutenção do mês, permitindo que gestores identifiquem rapidamente veículos de alto uso e custos operacionais elevados.
+O dashboard agrega informações como total de KM percorrido, ranking de veículos e projeção de custo de manutenção, permitindo que gestores identifiquem rapidamente veículos de alto uso e custos operacionais elevados.
 
 ---
 
@@ -43,8 +43,11 @@ CREATE DATABASE logitrack;
 
 ### 2. Executar o schema (tabelas + dados de exemplo)
 
+Para garantir que caracteres acentuados (como "Manutenção") sejam importados corretamente, forçamos o encoding do cliente:
+
 ```bash
-psql -U postgres -d logitrack -f src/main/resources/db/schema.sql
+# No Windows PowerShell
+$env:PGCLIENTENCODING='UTF8'; psql -U postgres -d logitrack -f src/main/resources/db/schema.sql
 ```
 
 > O script cria as tabelas `veiculos`, `viagens` e `manutencoes`, além de inserir dados de exemplo para teste imediato dos endpoints.
@@ -54,23 +57,18 @@ psql -U postgres -d logitrack -f src/main/resources/db/schema.sql
 Edite `src/main/resources/application.properties`:
 
 ```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/logitrack
+spring.datasource.url=jdbc:postgresql://localhost:5432/logitrack?charSet=UTF8
 spring.datasource.username=seu_usuario
 spring.datasource.password=sua_senha
 ```
 
 ### 4. Subir a aplicação
 
+No Windows, é **obrigatório** forçar o encoding da JVM para UTF-8 para evitar caracteres corrompidos na API:
+
 ```bash
-# Clonar o repositório
-git clone <url-do-repositorio>
-cd logitrack-backend
-
-# Rodar com Maven Wrapper (recomendado)
-./mvnw spring-boot:run
-
-# Ou com Maven instalado localmente
-mvn spring-boot:run
+# No Windows PowerShell
+$env:MAVEN_OPTS="-Dfile.encoding=UTF-8"; mvn spring-boot:run
 ```
 
 API disponível em: **`http://localhost:8080`**
@@ -105,54 +103,10 @@ API disponível em: **`http://localhost:8080`**
 {
   "veiculoId": 1,
   "dataSaida": "2026-04-01T08:00:00",
-  "dataChegada": "2026-04-01T14:00:00",
+  "dataChegada": "2026-04-01T18:00:00",
   "origem": "São Paulo, SP",
   "destino": "Campinas, SP",
   "kmPercorrida": 95.50
-}
-```
-
-**Response — `201 Created`:**
-```json
-{
-  "id": 9,
-  "veiculoId": 1,
-  "veiculoPlaca": "ABC-1234",
-  "veiculoModelo": "Fiat Strada",
-  "veiculoTipo": "LEVE",
-  "dataSaida": "2026-04-01T08:00:00",
-  "dataChegada": "2026-04-01T14:00:00",
-  "origem": "São Paulo, SP",
-  "destino": "Campinas, SP",
-  "kmPercorrida": 95.50
-}
-```
-
-#### Listagem paginada — `GET /api/v1/viagens`
-
-**Response — `200 OK`:**
-```json
-{
-  "content": [
-    {
-      "id": 1,
-      "veiculoId": 3,
-      "veiculoPlaca": "GHI-9012",
-      "veiculoModelo": "Mercedes Actros",
-      "veiculoTipo": "PESADO",
-      "dataSaida": "2026-03-03T06:00:00",
-      "dataChegada": "2026-03-04T20:00:00",
-      "origem": "São Paulo, SP",
-      "destino": "Porto Alegre, RS",
-      "kmPercorrida": 1125.00
-    }
-  ],
-  "totalElements": 8,
-  "totalPages": 1,
-  "number": 0,
-  "size": 20,
-  "first": true,
-  "last": true
 }
 ```
 
@@ -166,7 +120,7 @@ API disponível em: **`http://localhost:8080`**
 | `GET` | `/api/v1/dashboard/volume-por-tipo` | Viagens agrupadas por tipo de veículo |
 | `GET` | `/api/v1/dashboard/ranking-veiculos` | Veículos ordenados por KM percorrido |
 | `GET` | `/api/v1/dashboard/proximas-manutencoes` | Próximas 5 manutenções pendentes |
-| `GET` | `/api/v1/dashboard/projecao-custo` | Projeção de custo de manutenção do mês |
+| `GET` | `/api/v1/dashboard/projecao-custo` | Projeção total de custo de manutenção acumulado |
 
 #### `GET /api/v1/dashboard/total-km`
 ```json
@@ -179,17 +133,16 @@ API disponível em: **`http://localhost:8080`**
 #### `GET /api/v1/dashboard/volume-por-tipo`
 ```json
 [
-  { "tipoVeiculo": "PESADO", "totalViagens": 4 },
-  { "tipoVeiculo": "LEVE",   "totalViagens": 4 }
+  { "tipo": "PESADO", "volume": 4 },
+  { "tipo": "LEVE",   "volume": 4 }
 ]
 ```
 
 #### `GET /api/v1/dashboard/ranking-veiculos`
 ```json
 [
-  { "veiculoId": 4, "placa": "JKL-3456", "modelo": "Volvo FH",        "tipo": "PESADO", "totalKm": 3821.50, "totalViagens": 1 },
-  { "veiculoId": 3, "placa": "GHI-9012", "modelo": "Mercedes Actros", "tipo": "PESADO", "totalKm": 1683.30, "totalViagens": 2 },
-  { "veiculoId": 1, "placa": "ABC-1234", "modelo": "Fiat Strada",     "tipo": "LEVE",   "totalKm": 505.70,  "totalViagens": 3 }
+  { "placa": "JKL-3456", "modelo": "Volvo FH",        "tipo": "PESADO", "totalKm": 3821.50 },
+  { "placa": "GHI-9012", "modelo": "Mercedes Actros", "tipo": "PESADO", "totalKm": 1125.00 }
 ]
 ```
 
@@ -197,26 +150,18 @@ API disponível em: **`http://localhost:8080`**
 ```json
 [
   {
-    "manutencaoId": 1,
-    "veiculoId": 1,
     "placa": "ABC-1234",
     "modelo": "Fiat Strada",
-    "dataInicio": "2026-04-01",
-    "tipoServico": "Troca de óleo",
-    "custoEstimado": 250.00,
-    "status": "PENDENTE"
+    "data": "01/04/2026",
+    "servico": "Troca de óleo"
   }
 ]
 ```
-> Status possíveis: `PENDENTE` | `EM_REALIZACAO` | `CONCLUIDA`
 
 #### `GET /api/v1/dashboard/projecao-custo`
 ```json
 {
-  "mes": 3,
-  "ano": 2026,
-  "custoEstimadoTotal": 750.00,
-  "totalManutencoes": 1
+  "total": 4050.00
 }
 ```
 
@@ -229,32 +174,12 @@ Todos os erros retornam um envelope padronizado:
 ```json
 {
   "timestamp": "2026-04-01T10:00:00",
-  "status": 404,
-  "error": "Not Found",
-  "message": "Recurso 'Viagem' não encontrado com ID: 99",
-  "path": "/api/v1/viagens/99"
-}
-```
-
-| Cenário | Status |
-|---|---|
-| Recurso não encontrado | `404 Not Found` |
-| Campos inválidos (`@Valid`) | `400 Bad Request` + `fieldErrors` |
-| JSON malformado ou tipo inválido | `400 Bad Request` |
-| Regra de negócio violada | `400 Bad Request` |
-| Erro interno inesperado | `500 Internal Server Error` |
-
-**Exemplo de erro de validação (`400`):**
-```json
-{
-  "timestamp": "2026-04-01T10:00:00",
   "status": 400,
   "error": "Validation Failed",
   "message": "Há campos inválidos na requisição",
   "path": "/api/v1/viagens",
   "fieldErrors": {
-    "kmPercorrida": "O km percorrido é obrigatório",
-    "destino": "O destino é obrigatório"
+    "kmPercorrida": "O km percorrido deve ser maior que zero"
   }
 }
 ```
@@ -264,38 +189,19 @@ Todos os erros retornam um envelope padronizado:
 ## Decisões Técnicas
 
 ### Arquitetura em camadas
-O projeto segue a separação `Controller → Service → Repository`, com uma camada de `Mapper` dedicada à conversão entre entidades e DTOs. A conversão não fica no service nem no próprio DTO — fica no mapper, que é um `@Component` Spring injetável e testável. Os DTOs são POJOs puros sem dependência da camada de persistência.
+O projeto segue a separação `Controller → Service → Repository`, com uma camada de `Mapper` dedicada à conversão entre entidades e DTOs. Isso isola a lógica de apresentação da persistência.
 
-### Prevenção de N+1 com JOIN FETCH
-O vínculo `Viagem → Veiculo` é `LAZY` por padrão. Para não gerar uma query extra por viagem retornada, todas as buscas usam `JOIN FETCH` explícito. Na paginação, uma `countQuery` separada é obrigatória — sem ela, o Hibernate aplica `LIMIT/OFFSET` em memória, o que compromete performance em volumes maiores.
+### Suporte total a UTF-8
+Para evitar corrupção de caracteres especiais (acentuação) em ambientes Windows, o projeto força UTF-8 em três níveis:
+1. **Maven**: `project.build.sourceEncoding` no pom.xml.
+2. **JVM**: `-Dfile.encoding=UTF-8` na inicialização do serviço.
+3. **JDBC**: parâmetro `charSet=UTF8` na string de conexão com o PostgreSQL.
 
-### Spring Data Projections no Dashboard
-As queries nativas do dashboard retornam **interfaces de projeção tipadas** em vez de `Object[]`. O Spring Data mapeia os aliases SQL (`snake_case`) automaticamente para os getters da interface (`camelCase`), eliminando parsing por índice e erros de cast em tempo de execução.
+### JPQL Constructor Expressions no Dashboard
+Em vez de depender de Proxies de Projeção (que podem apresentar instabilidade de mapeamento em queries complexas), o dashboard utiliza `SELECT new com.logitrack.dto.dashboard...`. Isso garante que o DTO seja instanciado com os tipos e ordens de argumentos exatos vindos da camada de dados.
 
-> **Exceção pontual:** `total-km` usa JPQL escalar (`Optional<Double>`) porque queries agregadas de linha única com projeção nativa podem retornar `null` silenciosamente — gerando resposta `{}` com Jackson `non_null` ativo.
-
-### Validações com Bean Validation
-Campos obrigatórios do `ViagemRequestDTO` são validados antes de chegar ao service, via `@Valid`. O `GlobalExceptionHandler` trata `MethodArgumentNotValidException` com mapa de erros por campo e `HttpMessageNotReadableException` (JSON malformado) com `400` em vez de `500` genérico.
-
-### CORS configurável por ambiente
-Origens permitidas são definidas via `application.properties` (`logitrack.cors.allowed-origins`), sem alteração de código entre ambientes. Em produção, basta sobrescrever via variável de ambiente ou profile Spring.
-
----
-
-## Estrutura do Projeto
-
-```
-src/main/java/com/logitrack/
-├── config/          # CORS (WebConfig)
-├── controller/      # ViagemController, DashboardController
-├── service/         # ViagemService, DashboardService
-├── mapper/          # ViagemMapper (entidade → DTO)
-├── repository/      # Repositórios JPA + queries nativas
-│   └── projection/  # Interfaces de projeção do dashboard
-├── entity/          # Veiculo, Viagem, Manutencao + enums
-├── dto/             # DTOs de entrada/saída + dashboard
-└── exception/       # ResourceNotFoundException, GlobalExceptionHandler
-```
+### Prevenção de N+1
+Consultas de listagem utilizam `JOIN FETCH` explícito para carregar o Veículo associado à Viagem em uma única instrução SQL, otimizando o desempenho da aplicação.
 
 ---
 
@@ -303,11 +209,5 @@ src/main/java/com/logitrack/
 
 ```bash
 mvn clean package -DskipTests
-java -jar target/logitrack-backend-1.0.0.jar
-```
-
-Para sobrescrever origens CORS em produção:
-```bash
-java -jar target/logitrack-backend-1.0.0.jar \
-  --logitrack.cors.allowed-origins=https://meusite.com.br
+java -Dfile.encoding=UTF-8 -jar target/logitrack-backend-1.0.0.jar
 ```
