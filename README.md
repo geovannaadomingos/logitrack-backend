@@ -1,14 +1,14 @@
 # LogiTrack Pro — Backend API
 
 Sistemas logísticos perdem eficiência quando não há visibilidade sobre a frota.
-**LogiTrack Pro** resolve isso com uma API REST que centraliza o registro de viagens e expõe métricas operacionais em tempo real — quilometragem, custo de manutenção, desempenho por veículo — prontas para alimentar dashboards e apoiar decisões de gestão.
+**LogiTrack Pro** resolve isso com uma API REST que centraliza o registro de viagens, o gerenciamento básico da frota e expõe métricas operacionais em tempo real — quilometragem, custo de manutenção, desempenho por veículo — prontas para alimentar dashboards e apoiar decisões de gestão.
 
 ---
 
 ## Objetivo do Projeto
 
 Este projeto simula o backend de um sistema de gestão de frota para empresas de logística.
-O foco está em dois eixos: **operações CRUD** de viagens e **análise de dados** via dashboard.
+O foco está em três eixos: **gerenciamento de frota** (veículos), **operações CRUD** de viagens e **análise de dados** via dashboard.
 O dashboard agrega informações como total de KM percorrido, ranking de veículos e projeção de custo de manutenção, permitindo que gestores identifiquem rapidamente veículos de alto uso e custos operacionais elevados.
 
 ---
@@ -76,6 +76,23 @@ API disponível em: **`http://localhost:8080`**
 ---
 
 ## Endpoints
+
+### Veículos — `/api/v1/veiculos`
+
+| Método | Rota | Descrição | Status de sucesso |
+|---|---|---|---|
+| `GET` | `/api/v1/veiculos` | Lista todos os veículos da frota (id, placa, modelo) | `200 OK` |
+
+#### `GET /api/v1/veiculos`
+```json
+[
+  {
+    "id": 1,
+    "placa": "ABC-1234",
+    "modelo": "Fiat Strada"
+  }
+]
+```
 
 ### Viagens — `/api/v1/viagens`
 
@@ -189,7 +206,7 @@ Todos os erros retornam um envelope padronizado:
 ## Decisões Técnicas
 
 ### Arquitetura em camadas
-O projeto segue a separação `Controller → Service → Repository`, com uma camada de `Mapper` dedicada à conversão entre entidades e DTOs. Isso isola a lógica de apresentação da persistência.
+O projeto segue a separação `Controller → Service → Repository`, isolando a lógica de apresentação da persistência.
 
 ### Suporte total a UTF-8
 Para evitar corrupção de caracteres especiais (acentuação) em ambientes Windows, o projeto força UTF-8 em três níveis:
@@ -198,10 +215,10 @@ Para evitar corrupção de caracteres especiais (acentuação) em ambientes Wind
 3. **JDBC**: parâmetro `charSet=UTF8` na string de conexão com o PostgreSQL.
 
 ### JPQL Constructor Expressions no Dashboard
-Em vez de depender de Proxies de Projeção (que podem apresentar instabilidade de mapeamento em queries complexas), o dashboard utiliza `SELECT new com.logitrack.dto.dashboard...`. Isso garante que o DTO seja instanciado com os tipos e ordens de argumentos exatos vindos da camada de dados.
+O dashboard utiliza `SELECT new com.logitrack.dto.dashboard...` para garantir que o DTO seja instanciado com os tipos exatos vindos da camada de persistência, otimizando o mapeamento.
 
 ### Prevenção de N+1
-Consultas de listagem utilizam `JOIN FETCH` explícito para carregar o Veículo associado à Viagem em uma única instrução SQL, otimizando o desempenho da aplicação.
+Consultas de listagem utilizam `JOIN FETCH` explícito para carregar o Veículo associado à Viagem em uma única instrução SQL.
 
 ---
 
