@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 
 /**
  * DTO de entrada para criação e atualização de uma Viagem.
- * Contém apenas os campos que o cliente deve fornecer.
  */
 @Getter
 @Setter
