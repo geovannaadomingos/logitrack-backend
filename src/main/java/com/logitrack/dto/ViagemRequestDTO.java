@@ -2,6 +2,7 @@ package com.logitrack.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -20,8 +21,11 @@ public class ViagemRequestDTO {
     private Long veiculoId;
 
     @NotNull(message = "A data de saída é obrigatória")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime dataSaida;
 
+    @NotNull(message = "A data de chegada é obrigatória")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime dataChegada;
 
     @NotBlank(message = "A origem é obrigatória")
