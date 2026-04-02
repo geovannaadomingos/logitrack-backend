@@ -5,9 +5,6 @@ import lombok.*;
 
 import java.time.LocalDate;
 
-/**
- * DTO que representa o cronograma de manutenção simplificado conforme requisitos do desafio.
- */
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor

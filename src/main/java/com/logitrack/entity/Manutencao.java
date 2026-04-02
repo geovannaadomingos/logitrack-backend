@@ -7,9 +7,6 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-/**
- * Entidade que representa uma manutenção de veículo.
- */
 @Entity
 @Table(name = "manutencoes")
 @Getter

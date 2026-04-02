@@ -6,9 +6,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-/**
- * Repositório JPA para a entidade Veiculo.
- */
 @Repository
 public interface VeiculoRepository extends JpaRepository<Veiculo, Long> {
 

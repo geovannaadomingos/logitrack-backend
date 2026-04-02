@@ -57,7 +57,6 @@ public class DashboardService {
     @Transactional(readOnly = true)
     public List<ProximaManutencaoDTO> getProximasManutencoes() {
         log.debug("Buscando 5 primeiras manutenções não concluídas");
-        // O repositório agora retorna diretamente os DTOs via JPQL Constructor Expression
         return manutencaoRepository.findProximasManutencoes(PageRequest.of(0, 5));
     }
 

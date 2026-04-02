@@ -13,9 +13,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Repositório JPA para a entidade Viagem.
- */
 @Repository
 public interface ViagemRepository extends JpaRepository<Viagem, Long> {
 

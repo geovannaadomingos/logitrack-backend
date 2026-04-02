@@ -4,9 +4,6 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
-/**
- * DTO que representa a soma total estimada de custos de manutenção.
- */
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor

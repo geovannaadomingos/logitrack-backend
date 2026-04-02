@@ -5,15 +5,9 @@ import com.logitrack.dto.ViagemResponseDTO;
 import com.logitrack.entity.Viagem;
 import org.springframework.stereotype.Component;
 
-/**
- * Mapper responsável pela conversão entre a entidade Viagem e seus DTOs.
- */
 @Component
 public class ViagemMapper {
 
-    /**
-     * Converte uma entidade Viagem para o DTO de resposta.
-     */
     public ViagemResponseDTO toResponseDTO(Viagem viagem) {
         return ViagemResponseDTO.builder()
                 .id(viagem.getId())
@@ -29,9 +23,6 @@ public class ViagemMapper {
                 .build();
     }
 
-    /**
-     * Atualiza uma entidade existente com os dados do DTO.
-     */
     public void updateEntityFromDTO(ViagemRequestDTO dto, Viagem destino) {
         destino.setDataSaida(dto.getDataSaida());
         destino.setDataChegada(dto.getDataChegada());

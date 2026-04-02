@@ -4,9 +4,6 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
-/**
- * DTO que representa a posição de um veículo no ranking por KM percorrido.
- */
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor

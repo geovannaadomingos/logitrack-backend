@@ -6,9 +6,6 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/**
- * Entidade que representa uma viagem realizada por um veículo.
- */
 @Entity
 @Table(name = "viagens")
 @Getter

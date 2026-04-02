@@ -5,9 +5,6 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/**
- * DTO de saída para representação de uma Viagem.
- */
 @Getter
 @Setter
 @NoArgsConstructor

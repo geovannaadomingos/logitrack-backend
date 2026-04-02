@@ -7,9 +7,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/**
- * DTO de entrada para criação e atualização de uma Viagem.
- */
 @Getter
 @Setter
 @NoArgsConstructor

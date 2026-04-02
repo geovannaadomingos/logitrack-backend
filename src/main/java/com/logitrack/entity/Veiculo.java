@@ -7,9 +7,6 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Entidade que representa um veículo da frota.
- */
 @Entity
 @Table(name = "veiculos")
 @Getter
