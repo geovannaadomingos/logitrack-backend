@@ -13,6 +13,41 @@ O dashboard agrega informações como total de KM percorrido, ranking de veícul
 
 ---
 
+## Regras de Negócio
+
+Para garantir a integridade dos dados e a precisão dos cálculos do dashboard, as seguintes regras são aplicadas:
+
+- **KM percorrido**: Deve ser obrigatoriamente maior que zero (`> 0.00`).
+- **Consistência Cronológica**: A data de saída deve ser sempre anterior à data de chegada.
+- **Integridade de Referência**: Um veículo válido deve existir no sistema para que uma viagem seja registrada.
+- **Campos Mandatórios**: Dados de origem, destino e datas são validados na entrada (DTO).
+
+---
+
+## Arquitetura
+
+O projeto segue arquitetura em camadas:
+
+**Controller → Service → Repository → Database**
+
+- **Controller**: expõe endpoints REST e gerencia as requisições.
+- **Service**: contém as regras de negócio e orquestração.
+- **Repository**: abstração de acesso ao banco de dados (Spring Data JPA).
+- **DTOs**: garantem o contrato de dados seguro entre backend e frontend.
+
+---
+
+## Fluxo da Requisição
+
+O caminho de um dado desde a chamada da API até o banco segue este fluxo organizado:
+
+1. **Controller**: Recebe a requisição HTTP e valida a estrutura do DTO.
+2. **Service**: Aplica as regras de negócio e validações lógicas.
+3. **Repository**: Interage com o PostgreSQL via Spring Data JPA.
+4. **DTO**: O dado processado é mapeado e retornado ao cliente com segurança.
+
+---
+
 ## Tecnologias
 
 | Tecnologia | Versão |
@@ -24,6 +59,21 @@ O dashboard agrega informações como total de KM percorrido, ranking de veícul
 | Lombok | — |
 | Jakarta Validation | — |
 | Maven | 3.9+ |
+
+---
+
+## Variáveis de Ambiente
+
+Para flexibilidade em diferentes ambientes (Dev, Staging, Prod), a aplicação utiliza as seguintes variáveis:
+
+| Variável | Descrição |
+|----------|-----------|
+| `SPRING_DATASOURCE_URL` | URL de conexão do PostgreSQL |
+| `SPRING_DATASOURCE_USERNAME` | Usuário do banco |
+| `SPRING_DATASOURCE_PASSWORD` | Senha do banco |
+| `PORT` | Porta de execução (padrão 8080) |
+
+> O projeto suporta fallback automático para valores locais via `application.properties`.
 
 ---
 
@@ -184,6 +234,15 @@ API disponível em: **`http://localhost:8080`**
 
 ---
 
+## Integração com Frontend
+
+A API foi desenhada para ser consumida de forma transparente pelo frontend do LogiTrack (React).
+
+- **Base URL padrão**: `http://localhost:8080/api/v1`
+- **CORS**: Configurado para permitir comunicações seguras entre os módulos.
+
+---
+
 ## Tratamento de Erros
 
 Todos os erros retornam um envelope padronizado:
@@ -200,6 +259,20 @@ Todos os erros retornam um envelope padronizado:
   }
 }
 ```
+
+---
+
+## Possíveis Problemas e Soluções
+
+#### Problema: Caracteres quebrados (acentuação)
+- **Causa**: Encoding padrão do Windows/JVM diferente de UTF-8.
+- **Solução**: Certifique-se de rodar com a flag `-Dfile.encoding=UTF-8`.
+
+#### Problema: O banco de dados não conecta
+- **Checklist**:
+  - Verifique se o PostgreSQL está rodando (`pg_isready`).
+  - Valide as credenciais em `SPRING_DATASOURCE_USERNAME` e `PASSWORD`.
+  - Verifique se o banco `logitrack` foi criado.
 
 ---
 
@@ -222,9 +295,51 @@ Consultas de listagem utilizam `JOIN FETCH` explícito para carregar o Veículo 
 
 ---
 
-## Build para Produção
 
+## Deploy
+
+Para rodar o backend em ambiente de produção ou simular a execução final:
+
+### Execução via JAR
+
+1. Gere o artefato:
 ```bash
 mvn clean package -DskipTests
-java -Dfile.encoding=UTF-8 -jar target/logitrack-backend-1.0.0.jar
 ```
+
+2. Execute o JAR forçando o encoding:
+```bash
+java -Dfile.encoding=UTF-8 -jar target/*.jar
+```
+
+### Variáveis obrigatórias em produção
+
+Ao realizar o deploy em ambientes cloud (Railway, Render, AWS), configure as seguintes variáveis:
+
+| Variável | Exemplo |
+|----------|---------|
+| `SPRING_DATASOURCE_URL` | `jdbc:postgresql://db-host:5432/logitrack` |
+| `SPRING_DATASOURCE_USERNAME` | `postgres` |
+| `SPRING_DATASOURCE_PASSWORD` | `suasenha123` |
+| `PORT` | `8080` |
+
+---
+
+## Docker (Opcional)
+
+O projeto está preparado para ser containerizado, facilitando a orquestração e garantindo paridade total entre os ambientes de desenvolvimento e produção.
+
+---
+
+## Testes
+
+A aplicação utiliza as melhores práticas de testes do ecossistema Spring:
+
+- **Spring Boot Test**: Para testes de integração e contexto.
+- **JUnit 5 / Mockito**: Para testes unitários de regras de negócio.
+
+Para executar os testes:
+```bash
+mvn test
+```
+---
